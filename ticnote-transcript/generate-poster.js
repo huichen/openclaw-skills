@@ -1,5 +1,5 @@
 const { chromium } = require('playwright');
-const fs = require('fs');
+const path = require('path');
 
 /**
  * 金句海报生成脚本
@@ -16,7 +16,8 @@ async function generatePoster(inputHtml, outputPath, width = 600, scale = 3) {
   });
   
   await page.goto(`file://${inputHtml}`, {
-    waitUntil: 'networkidle'
+    waitUntil: 'networkidle',
+    timeout: 30000
   });
   
   // 等待页面完全渲染
@@ -33,7 +34,8 @@ async function generatePoster(inputHtml, outputPath, width = 600, scale = 3) {
   // 截图
   await page.screenshot({
     path: outputPath,
-    type: 'png'
+    type: 'png',
+    fullPage: true
   });
   
   await browser.close();
@@ -44,8 +46,8 @@ async function generatePoster(inputHtml, outputPath, width = 600, scale = 3) {
 // 命令行调用
 if (require.main === module) {
   const args = process.argv.slice(2);
-  const inputHtml = args[0] || '/Users/geilige/.openclaw/workspace/ai-quotes-poster.html';
-  const outputPath = args[1] || '/Users/geilige/.openclaw/workspace/ai-quotes-poster-mobile.png';
+  const inputHtml = args[0] || path.join('/tmp', 'ticnote-poster.html');
+  const outputPath = args[1] || path.join('/tmp', 'ticnote-poster.png');
   const width = parseInt(args[2]) || 600;
   const scale = parseInt(args[3]) || 3;
   

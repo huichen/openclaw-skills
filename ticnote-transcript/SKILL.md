@@ -14,7 +14,7 @@ description: 从 TicNote 分享链接中提取字幕，通过 API 获取 JSON �
 ## 文件结构
 
 ```
-~/.openclaw/skills/ticnote-transcript/
+ticnote-transcript/
 ├── SKILL.md              # 本文档
 ├── template.html         # 海报 HTML 模板
 └── generate-poster.js    # 海报截图生成脚本
@@ -61,7 +61,8 @@ const shareCode = url.match(/shareDetail\/([a-zA-Z0-9]+)/)[1];
 ### 2. 调用 API 获取数据
 ```javascript
 const apiUrl = `https://voice-api.ticnote.cn/api/share/show/detail/${shareCode}`;
-const data = await fetch(apiUrl).then(r => r.json());
+const response = await fetch(apiUrl);
+const data = await response.json();
 ```
 
 ### 3. 整理字幕内容
@@ -89,7 +90,7 @@ function formatTime(seconds) {
 ### 4. 创建飞书文档
 
 ```javascript
-feishu_create_doc({
+await feishu_create_doc({
   title: `会议记录 - ${data.data.title}`,
   markdown: generateMarkdown(segments)
 });
@@ -115,7 +116,7 @@ feishu_create_doc({
 #### 6.1 准备海报数据
 ```javascript
 const posterData = {
-  title: "AI 变革 · 金句精选",
+  title: "金句精选",
   subtitle: data.data.title,
   speakers: [
     {
@@ -134,15 +135,12 @@ const posterData = {
 #### 6.2 生成 HTML
 ```javascript
 const fs = require('fs');
-const { generatePoster } = require(
-  '/Users/geilige/.openclaw/skills/ticnote-transcript/generate-poster.js'
-);
+const path = require('path');
+const { generatePoster } = require('./generate-poster.js');
 
-// 读取模板
-const template = fs.readFileSync(
-  '/Users/geilige/.openclaw/skills/ticnote-transcript/template.html',
-  'utf-8'
-);
+// 读取模板（使用相对路径）
+const templatePath = path.join(__dirname, 'template.html');
+const template = fs.readFileSync(templatePath, 'utf-8');
 
 // 生成内容 HTML
 function generateHTML(data) {
@@ -180,18 +178,19 @@ const html = template
   .replace('{{SUBTITLE}}', posterData.subtitle)
   .replace('{{CONTENT}}', generateHTML(posterData));
 
-// 保存 HTML
-const htmlPath = '/Users/geilige/.openclaw/workspace/ticnote-poster.html';
+// 保存 HTML 到临时目录
+const htmlPath = path.join('/tmp', 'ticnote-poster.html');
 fs.writeFileSync(htmlPath, html);
 ```
 
 #### 6.3 生成图片
 ```javascript
+const outputPath = path.join('/tmp', 'ticnote-poster.png');
 await generatePoster(
-  htmlPath,                              // 输入 HTML
-  '/Users/geilige/.openclaw/workspace/ticnote-poster.png',  // 输出图片
-  600,   // 视口宽度
-  3      // 渲染倍率（3=超高清）
+  htmlPath,      // 输入 HTML
+  outputPath,    // 输出图片
+  600,           // 视口宽度
+  3              // 渲染倍率（3=超高清）
 );
 ```
 
@@ -199,7 +198,7 @@ await generatePoster(
 ```javascript
 await message({
   action: 'send',
-  media: '/Users/geilige/.openclaw/workspace/ticnote-poster.png'
+  media: outputPath
 });
 ```
 
@@ -265,16 +264,16 @@ await message({
 
 ```javascript
 const fs = require('fs');
-const { generatePoster } = require(
-  '/Users/geilige/.openclaw/skills/ticnote-transcript/generate-poster.js'
-);
+const path = require('path');
+const { generatePoster } = require('./generate-poster.js');
 
 // 1. 提取分享码
 const shareCode = url.match(/shareDetail\/([a-zA-Z0-9]+)/)[1];
 
 // 2. 调用 API
 const apiUrl = `https://voice-api.ticnote.cn/api/share/show/detail/${shareCode}`;
-const data = await fetch(apiUrl).then(r => r.json());
+const response = await fetch(apiUrl);
+const data = await response.json();
 
 // 3. 整理内容
 const segments = data.data.segments
@@ -307,44 +306,39 @@ const posterData = {
   }))
 };
 
-// 读取模板并填充
-const template = fs.readFileSync(
-  '/Users/geilige/.openclaw/skills/ticnote-transcript/template.html',
-  'utf-8'
-);
+// 读取模板并填充（使用相对路径）
+const templatePath = path.join(__dirname, 'template.html');
+const template = fs.readFileSync(templatePath, 'utf-8');
 
 const html = template
   .replace('{{TITLE}}', posterData.title)
   .replace('{{SUBTITLE}}', posterData.subtitle)
   .replace('{{CONTENT}}', generateHTML(posterData));
 
-const htmlPath = '/Users/geilige/.openclaw/workspace/ticnote-poster.html';
+// 保存到临时目录
+const htmlPath = path.join('/tmp', 'ticnote-poster.html');
 fs.writeFileSync(htmlPath, html);
 
 // 生成图片
-await generatePoster(
-  htmlPath,
-  '/Users/geilige/.openclaw/workspace/ticnote-poster.png',
-  600,
-  3
-);
+const outputPath = path.join('/tmp', 'ticnote-poster.png');
+await generatePoster(htmlPath, outputPath, 600, 3);
 
 // 发送给用户
 await message({
   action: 'send',
-  media: '/Users/geilige/.openclaw/workspace/ticnote-poster.png'
+  media: outputPath
 });
 ```
 
 ## 说话人样式类名
 
-| 类名 | 头像颜色 | 边框颜色 |
-|------|---------|---------|
-| `tim` | 粉红渐变 | 粉红 |
-| `fs` | 蓝色渐变 | 蓝色 |
-| `dg` | 绿色渐变 | 绿色 |
-| `kzk` | 橙黄渐变 | 橙色 |
-| `default` | 紫色渐变 | 紫色 |
+| 类名 | 头像颜色 | 边框颜色 | 适用场景 |
+|------|---------|---------|---------|
+| `tim` | 粉红渐变 | 粉红 | 影视飓风/创作者 |
+| `fs` | 蓝色渐变 | 蓝色 | 傅盛/技术专家 |
+| `dg` | 绿色渐变 | 绿色 | 刀哥/创业者 |
+| `kzk` | 橙黄渐变 | 橙色 | 卡兹克/主持人 |
+| `default` | 紫色渐变 | 紫色 | 其他默认 |
 
 ## 高亮语法
 
@@ -359,6 +353,31 @@ await message({
 <span class="highlight">重要</span>
 ```
 
+## 优化建议
+
+### 路径处理
+- ✅ 使用 `path.join(__dirname, ...)` 处理相对路径
+- ✅ 临时文件使用 `/tmp` 目录（跨平台兼容）
+- ✅ 避免硬编码绝对路径
+
+### 性能优化
+- 海报生成使用 3x 渲染，如需更快可降低为 2x
+- 长文本金句建议截断到 100 字以内
+- 说话人超过 5 人时建议分批生成海报
+
+### 错误处理
+```javascript
+try {
+  const data = await fetch(apiUrl).then(r => r.json());
+  if (data.code !== 200) {
+    throw new Error(`API 错误：${data.message}`);
+  }
+} catch (error) {
+  console.error('处理失败:', error);
+  // 降级处理：只生成文档，不生成海报
+}
+```
+
 ## 注意事项
 
 1. **API 调用频率**：避免短时间内多次调用
@@ -366,6 +385,6 @@ await message({
 3. **隐私保护**：敏感内容需要脱敏处理
 4. **海报生成**：
    - 确保已安装 Playwright 和 Chromium
-   - 使用绝对路径避免问题
+   - 使用 `path.join()` 处理路径
    - 高清渲染（scale=3）会占用更多内存
 5. **金句提取**：必须从原始 API 数据提取，不能手动编造
