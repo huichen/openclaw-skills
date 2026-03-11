@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>金句海报</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      --quote-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      background: var(--primary-gradient);
+      padding: 20px 0;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: none;
+      margin: 0;
+      padding: 0 16px;
+    }
+    
+    .poster {
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .header {
+      background: var(--primary-gradient);
+      padding: 20px 2px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .header .subtitle {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.85);
+      letter-spacing: 2px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .content {
+      padding: 20px 2px;
+    }
+    
+    .speaker-section {
+      margin-bottom: 28px;
+    }
+    
+    .speaker-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .speaker-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 8px 2px;
+      background: linear-gradient(135deg, #f8f9ff, #fff);
+      border-radius: 0;
+    }
+    
+    .speaker-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      margin-right: 14px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .speaker-tim { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .speaker-fs { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .speaker-dg { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    .speaker-kzk { background: linear-gradient(135deg, #fa709a, #fee140); }
+    .speaker-default { background: linear-gradient(135deg, #667eea, #764ba2); }
+    
+    .speaker-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .speaker-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .speaker-title {
+      font-size: 16px;
+      color: #888;
+      margin-top: 3px;
+    }
+    
+    .quote-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .quote-card {
+      background: linear-gradient(135deg, #fafbff, #fff);
+      border-left: 5px solid;
+      border-radius: 0;
+      padding: 18px 0 18px 0;
+      position: relative;
+      box-shadow: var(--quote-shadow);
+      transition: transform 0.2s ease;
+    }
+    
+    .quote-card:hover {
+      transform: translateX(4px);
+    }
+    
+    .quote-card-tim { border-color: #f5576c; }
+    .quote-card-fs { border-color: #4facfe; }
+    .quote-card-dg { border-color: #43e97b; }
+    .quote-card-kzk { border-color: #fa709a; }
+    .quote-card-default { border-color: #667eea; }
+    
+    .quote-card::before {
+      content: """;
+      position: absolute;
+      top: 10px;
+      left: 6px;
+      font-size: 42px;
+      color: currentColor;
+      opacity: 0.08;
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+    
+    .quote-text {
+      font-size: 30px;
+      line-height: 1.6;
+      color: #444;
+      position: relative;
+      z-index: 1;
+      padding-left: 12px;
+      padding-right: 6px;
+      text-align: justify;
+    }
+    
+    .highlight {
+      background: linear-gradient(135deg, #667eea30, #764ba230);
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-weight: 700;
+      color: #667eea;
+      white-space: nowrap;
+    }
+    
+    /* 适配超小屏幕 */
+    @media (max-width: 360px) {
+      body {
+        padding: 16px 0;
+      }
+      
+      .header h1 {
+        font-size: 24px;
+      }
+      
+      .header .subtitle {
+        font-size: 14px;
+        letter-spacing: 2px;
+      }
+      
+      .quote-text {
+        font-size: 26px;
+      }
+      
+      .speaker-avatar {
+        width: 46px;
+        height: 46px;
+        font-size: 20px;
+      }
+      
+      .speaker-name {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="poster">
+      <div class="header">
+        <div class="header-icon">🎯</div>
+        <h1>{{TITLE}}</h1>
+        <p class="subtitle">{{SUBTITLE}}</p>
+      </div>
+      
+      <div class="content">
+        {{CONTENT}}
+      </div>
+    </div>
+  </div>
+</body>
+</html>
